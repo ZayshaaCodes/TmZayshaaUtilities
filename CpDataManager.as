@@ -1,4 +1,4 @@
-namespace ZU
+namespace ZUtil
 {
     funcdef void CpChangeEvent(int);
     funcdef void CpTimeEvent(int, int);

@@ -1,4 +1,4 @@
-namespace ZU
+namespace ZUtil
 {
     CSmPlayer@ GetPlayer()
     {   
