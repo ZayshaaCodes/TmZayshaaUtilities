@@ -1,49 +1,54 @@
 namespace ZUtil
 {
-    CSmPlayer@ GetPlayer()
+    CSmPlayer@ GetPlayer(CGamePlayground@ playground)
     {   
-        auto pg = cast<CSmArenaClient>(GetApp().CurrentPlayground);
-        if(pg is null) return null;
-        if (pg.GameTerminals.Length < 1) return null;
-        return cast<CSmPlayer>(pg.GameTerminals[0].ControlledPlayer);
+        if(playground is null) return null;
+        if (playground.GameTerminals.Length < 1) return null;
+        return cast<CSmPlayer>(playground.GameTerminals[0].ControlledPlayer);
     }
 
-    uint GetEffectiveCpCount(){    
-        auto pg = cast<CSmArenaClient>(GetApp().CurrentPlayground);
-        auto arena = cast<CSmArena>(pg.Arena);
-        auto map = pg.Map;
+    uint GetEffectiveCpCount(CSmArenaClient@ playground)
+    {    
+        auto arena = cast<CSmArena>(playground.Arena);
+        auto map = playground.Map;
+
+        if (arena is null || map is null) return 0;
+
         auto landmarks = arena.MapLandmarks;
+        if (landmarks.Length == 0) return 0;
 
-        auto lapCount = pg.Map.TMObjective_IsLapRace ? pg.Map.TMObjective_NbLaps : uint(1);
+        if (map.MapType == "TrackMania\\TM_Royal") return 5;
 
-        array<int> orders(0);
-        uint count = 1; // starting at 1 because there is always a finish
+            auto lapCount = playground.Map.TMObjective_IsLapRace ? playground.Map.TMObjective_NbLaps : uint(1);
+            array<int> orders(0);
+            uint _cpCount = 1; // starting at 1 because there is always a finish
 
-        // if a cp has an order > 0, it may be a linked CP, so we increment that index and count them later
-        for (uint i = 0; i < landmarks.Length; i++)
-        {
-            auto lm = landmarks[i];
-            auto tag = lm.Tag;
-            if (lm.Tag == "Checkpoint" )
+            // if a cp has an order > 0, it may be a linked CP, so we increment that index and count them later
+            for (uint i = 0; i < landmarks.Length; i++)
             {
-                if (lm.Order == 0)
+                auto lm = landmarks[i];
+                auto tag = lm.Tag;
+                if (lm.Tag == "Checkpoint" )
                 {
-                    count++;
-                }else{
-                    if (lm.Order >= orders.Length) orders.Resize(lm.Order + 1);
-                    orders[lm.Order]++;
-                }
-            }            
-        }
-
-        for (uint i = 0; i < orders.Length; i++)
-        {
-            if (orders[i] > 0)
-            {
-                count++;
+                    if (lm.Order == 0)
+                    {
+                        _cpCount++;
+                    }else{
+                        if (lm.Order >= orders.Length) orders.Resize(lm.Order + 1);
+                        orders[lm.Order]++;
+                    }
+                }            
             }
-        }
-        // print(lapCount);
-        return count * lapCount;
+
+            for (uint i = 0; i < orders.Length; i++)
+            {
+                if (orders[i] > 0)
+                {
+                    _cpCount++;
+                }
+            }
+            // print(lapCount);
+            return _cpCount * lapCount;
+
     }
 }
