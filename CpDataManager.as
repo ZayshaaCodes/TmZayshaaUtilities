@@ -1,15 +1,29 @@
 namespace ZUtil
 {
-    funcdef void CpChangeEvent(int);
-    funcdef void CpTimeEvent(int, int);
+    funcdef void CpTimesCountChangeEvent(int);
+    funcdef void CpNewTimeEvent(int, int);
+
+    array<int> cpTimes(0);
+
+    interface IHandleCpEvents{
+        void OnCpTimesCountChangeEvent(int);
+        void OnCPNewTimeEvent(int, int);
+    }
 
     class CpDataManager
     {
         uint lastCount = 0;
 
-        CpTimeEvent@ newTimeCallback = function(int i, int t) {};
-        CpChangeEvent@ countChangeCallback = function(int i) {};
+        CpTimesCountChangeEvent@ countChangeCallback = function(int i) {};
+        CpNewTimeEvent@ newTimeCallback = function(int i, int t) {};
         
+        CpDataManager(){ }
+
+        CpDataManager(IHandleCpEvents@ iObj){
+            @countChangeCallback = CpTimesCountChangeEvent(iObj.OnCpTimesCountChangeEvent);
+            @newTimeCallback = CpNewTimeEvent(iObj.OnCPNewTimeEvent);
+        }
+
         uint GetAllCpTimes(CSmPlayer@ player, array<int>@ arr){     
             if (player is null) return 0;
 
@@ -22,11 +36,15 @@ namespace ZUtil
 
             return count;
         }
+        
+        const array<int>@ get_CpTimes(){
+            return cpTimes;
+        }
 
         void Update(CSmPlayer@ player){
             if (player is null) return;
 
-            auto count = GetFinished_CpCount(player);       
+            auto count = GetFinished_CpCount(player);
             if (count != lastCount)
             {
                 countChangeCallback(count - 1);

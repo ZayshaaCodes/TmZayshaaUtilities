@@ -1,6 +1,6 @@
 namespace ZUtil
 {
-    CSmPlayer@ GetPlayer(CGamePlayground@ playground)
+    CSmPlayer@ GetLocalPlayer(CGamePlayground@ playground)
     {   
         if(playground is null) return null;
         if (playground.GameTerminals.Length < 1) return null;
