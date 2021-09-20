@@ -14,22 +14,20 @@ namespace ZUtil
     {
         uint lastCount = 0;
 
-        CpTimesCountChangeEvent@ countChangeCallback = function(int i) {};
-        CpNewTimeEvent@ newTimeCallback = function(int i, int t) {};
+        array<CpTimesCountChangeEvent@> countChangeCallbacks();
+        array<CpNewTimeEvent@> newTimeCallbacks();
         
-        CpDataManager(){ }
-
-        CpDataManager(IHandleCpEvents@ iObj){
-            @countChangeCallback = CpTimesCountChangeEvent(iObj.OnCpTimesCountChangeEvent);
-            @newTimeCallback = CpNewTimeEvent(iObj.OnCPNewTimeEvent);
+        void RegisterCallbacks(IHandleCpEvents@ iObj){
+            countChangeCallbacks.InsertLast(CpTimesCountChangeEvent(iObj.OnCpTimesCountChangeEvent));
+            newTimeCallbacks.InsertLast(CpNewTimeEvent(iObj.OnCPNewTimeEvent));
         }
 
         uint GetAllCpTimes(CSmPlayer@ player, array<int>@ arr){     
             if (player is null) return 0;
 
-            auto count = Math::Min(arr.Length, GetFinished_CpCount(player));
+            auto count = uint(Math::Min(arr.Length, GetFinished_CpCount(player)));
 
-            for (uint i = 0; i < uint(count); i++)
+            for (uint i = 0; i < count; i++)
             {
                 arr[i] = GetCpFinTime(player,i);
             }
@@ -47,15 +45,20 @@ namespace ZUtil
             auto count = GetFinished_CpCount(player);
             if (count != lastCount)
             {
-                countChangeCallback(count - 1);
+                for (uint i = 0; i < countChangeCallbacks.Length; i++)
+                    countChangeCallbacks[i](count - 1);
                 if (count > lastCount){
-                    newTimeCallback(count - 1, GetCpFinTime(player, count - 1));
+                    for (uint i = 0; i < newTimeCallbacks.Length; i++){
+                        auto time = GetCpFinTime(player, count - 1);
+                        newTimeCallbacks[i](count - 1, time);
+                    }
                 }
                 lastCount = count;
             }
 
         }
 
+        //for debugging
         void Render(CSmPlayer@ player){
             if (player is null) return;
 

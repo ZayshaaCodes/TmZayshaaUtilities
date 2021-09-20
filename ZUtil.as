@@ -7,11 +7,16 @@ namespace ZUtil
         return cast<CSmPlayer>(playground.GameTerminals[0].ControlledPlayer);
     }
 
-    uint GetEffectiveCpCount(CSmArenaClient@ playground)
-    {    
-        auto arena = cast<CSmArena>(playground.Arena);
-        auto map = playground.Map;
+    uint GetEffectiveCpCount(CSmArenaClient@ playground){
+        if (playground !is null)
+        {
+            return GetEffectiveCpCount(playground.Map, cast<CSmArena>(playground.Arena));
+        }
+        return 0;
+    }
 
+    uint GetEffectiveCpCount( CGameCtnChallenge@ map, CSmArena@ arena)
+    {    
         if (arena is null || map is null) return 0;
 
         auto landmarks = arena.MapLandmarks;
@@ -19,7 +24,7 @@ namespace ZUtil
 
         if (map.MapType == "TrackMania\\TM_Royal") return 5;
 
-            auto lapCount = playground.Map.TMObjective_IsLapRace ? playground.Map.TMObjective_NbLaps : uint(1);
+            auto lapCount = map.TMObjective_IsLapRace ? map.TMObjective_NbLaps : uint(1);
             array<int> orders(0);
             uint _cpCount = 1; // starting at 1 because there is always a finish
 
@@ -28,7 +33,7 @@ namespace ZUtil
             {
                 auto lm = landmarks[i];
                 auto tag = lm.Tag;
-                if (lm.Tag == "Checkpoint" )
+                if (lm.Tag == "Checkpoint" || lm.Tag == "LinkedCheckpoint" )
                 {
                     if (lm.Order == 0)
                     {
