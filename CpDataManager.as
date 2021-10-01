@@ -82,12 +82,14 @@ namespace ZUtil
         }
 
         uint GetFinished_CpCount(const CSmPlayer@ player){   
-            return Dev::GetOffsetUint16(player, 0x680);
+            // return 0;
+            return Dev::GetOffsetUint16(player, 0x688);
         }
 
         int GetCpFinTime(CSmPlayer@ player, const uint i){
 
-            auto CPTimesArrayPtr = Dev::GetOffsetUint64(player, 0x688 - 0x10);
+            // return 0;
+            auto CPTimesArrayPtr = Dev::GetOffsetUint64(player, 0x680);
             auto count = GetFinished_CpCount(player);
 
             if(i >= count) return 0;

@@ -37,7 +37,7 @@ namespace ZUtil
 			super(name, settingPos, settingSize);
 		}
 
-		void RenderInterface() override 
+		void RenderInterface() override
 		{
 			if (m_moveHud) 
 			{
@@ -59,6 +59,12 @@ namespace ZUtil
 	{
 		UiPanel(const string &in name, const vec2 &in settingPos, const vec2 &in settingSize){
 			super(name, settingPos, settingSize);
+		}
+
+		void InternalRender() override {
+			UI::SetNextWindowSize(int(m_size.x), int(m_size.y), UI::Cond::Appearing);
+			UI::SetNextWindowPos(int(m_pos.x), int(m_pos.y), UI::Cond::Appearing);
+			Render();
 		}
 	}
 }
